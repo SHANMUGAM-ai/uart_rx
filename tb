@@ -1,0 +1,23 @@
+// Code your testbench here
+// or browse Examples
+`timescale 1ns/1ps
+module tb_uart_tx;
+
+reg clk = 0, rst = 0, tx_start = 0;
+reg [7:0] data_in = 8'h55;
+wire tx, tx_busy;
+
+uart_tx uut (.clk(clk), .rst(rst), .tx_start(tx_start), .data_in(data_in), .tx(tx), .tx_busy(tx_busy));
+
+always #5 clk = ~clk;
+
+initial begin
+    $dumpfile("uart_tx.vcd");
+    $dumpvars(0, tb_uart_tx);
+    
+    rst = 1; #20; rst = 0;
+    #20 tx_start = 1; #10 tx_start = 0;
+    #200 $finish;
+end
+
+endmodule

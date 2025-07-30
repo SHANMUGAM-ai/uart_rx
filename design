@@ -1,0 +1,43 @@
+// Code your design here
+module uart_tx (
+    input clk,
+    input rst,
+    input tx_start,
+    input [7:0] data_in,
+    output reg tx,
+    output reg tx_busy
+);
+    reg [3:0] bit_cnt;
+    reg [9:0] tx_shift;
+
+    parameter IDLE = 0, LOAD = 1, TRANS = 2;
+    reg [1:0] state;
+
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            tx <= 1;
+            tx_busy <= 0;
+            state <= IDLE;
+        end else begin
+            case (state)
+                IDLE: begin
+                    tx <= 1;
+                    tx_busy <= 0;
+                    if (tx_start) begin
+                        tx_shift <= {1'b1, data_in, 1'b0};
+                        bit_cnt <= 0;
+                        state <= TRANS;
+                        tx_busy <= 1;
+                    end
+                end
+                TRANS: begin
+                    tx <= tx_shift[bit_cnt];
+                    bit_cnt <= bit_cnt + 1;
+                    if (bit_cnt == 9) begin
+                        state <= IDLE;
+                    end
+                end
+            endcase
+        end
+    end
+endmodule
